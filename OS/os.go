@@ -22,7 +22,7 @@ type XOS struct {
 	XosName      string
 }
 
-func (xos XOS) XOpen(zName gqliteFilename, flags int) (GqliteFile, error) {
+func (xos *XOS) XOpen(zName gqliteFilename, flags int) (GqliteFile, error) {
 	fullPath, err := xos.XFullPathName(zName)
 	if err != nil {
 		log.Fatal("Can't reach the file path.")
@@ -32,11 +32,11 @@ func (xos XOS) XOpen(zName gqliteFilename, flags int) (GqliteFile, error) {
 	return gqliteFile, err
 }
 
-func (xos XOS) xDelete() {}
+func (xos *XOS) xDelete() {}
 
-func (xos XOS) xAccess() {}
+func (xos *XOS) xAccess() {}
 
-func (xos XOS) XFullPathName(fileName string) (string, error) {
+func (xos *XOS) XFullPathName(fileName string) (string, error) {
 	cwd, err := os.Getwd()
 	cwd = filepath.Join(cwd, fileName)
 	return cwd, err
