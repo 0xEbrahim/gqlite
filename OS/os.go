@@ -27,15 +27,18 @@ type XOS struct {
 }
 
 func (xos *XOS) XOpen(zName gqliteFilename, flags int) (GqliteFile, error) {
+
 	fullPath, err := xos.XFullPathName(zName)
 	if err != nil {
-		log.Fatal("Can't reach the file path.")
+		return GqliteFile{}, fmt.Errorf("cannot resolve full path: %w", err)
 	}
-	err = xos.XFileExists(zName)
-	if err != nil {
-		return GqliteFile{}, fmt.Errorf("file does not exist: %w", err)
+
+	if flags&CREATE_ == 0 {
+		if err := xos.XFileExists(gqliteFilename(fullPath)); err != nil {
+			return GqliteFile{}, fmt.Errorf("file does not exist: %w", err)
+		}
 	}
-	f, err := os.OpenFile(fullPath, flags, 0)
+	f, err := os.OpenFile(fullPath, flags, 0664)
 	gqliteFile := GqliteFile{File: f, Path: fullPath}
 	return gqliteFile, err
 }
@@ -78,7 +81,7 @@ func (xos *XOS) XAccess(zName gqliteFilename, flag int) bool {
 		}
 		_ = f.Close()
 	} else if flag == ACCESS_WRITABLE {
-		f, err := os.OpenFile(zName, WRITE_ONLY, 0)
+		f, err := os.OpenFile(zName, WRITE_ONLY, 0644)
 		if err != nil {
 			return false
 		}
