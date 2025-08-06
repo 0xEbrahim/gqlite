@@ -7,6 +7,7 @@ import (
 
 type GqliteFile struct {
 	File *os.File
+	Path string
 }
 
 func (gqlF *GqliteFile) XClose() error {
@@ -36,4 +37,17 @@ func (gqlF *GqliteFile) XWrite(p []byte, offset int64) error {
 		return io.ErrShortWrite
 	}
 	return err
+}
+
+func (gqlF *GqliteFile) XFileName() (string, error) {
+	return gqlF.Path, nil
+}
+
+func (gqlF *GqliteFile) XFileSize() (int64, error) {
+	info, err := gqlF.File.Stat()
+	if err != nil {
+		return 0, err
+	}
+	sz := info.Size()
+	return sz, nil
 }
