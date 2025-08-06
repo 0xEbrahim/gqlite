@@ -1,6 +1,7 @@
 package OS
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -27,12 +28,45 @@ func (xos *XOS) XOpen(zName gqliteFilename, flags int) (GqliteFile, error) {
 	if err != nil {
 		log.Fatal("Can't reach the file path.")
 	}
+	err = xos.XFileExists(zName)
+	if err != nil {
+		return GqliteFile{}, fmt.Errorf("file does not exist: %w", err)
+	}
 	f, err := os.OpenFile(fullPath, flags, 0)
 	gqliteFile := GqliteFile{File: f}
 	return gqliteFile, err
 }
 
-func (xos *XOS) xDelete() {}
+func (xos *XOS) xDelete(zName gqliteFilename, dirSync bool) error {
+
+	if err := xos.XFileExists(zName); err != nil {
+		return fmt.Errorf("file does not exist: %w", err)
+	}
+	if err := os.Remove(zName); err != nil {
+		return fmt.Errorf("error while deleting the file: %w", err)
+	}
+	if dirSync {
+		dir := filepath.Dir(string(zName))
+		f, err := os.Open(dir)
+		if err != nil {
+			return fmt.Errorf("error while opening the directory: %w", err)
+		}
+		defer func(f *os.File) {
+			if Err := f.Close(); Err != nil {
+				log.Fatal("error while closing the directory")
+			}
+		}(f)
+		if err := f.Sync(); err != nil {
+			return fmt.Errorf("failed to sync directory: %w", err)
+		}
+	}
+	return nil
+}
+
+func (xos *XOS) XFileExists(zName gqliteFilename) error {
+	_, err := os.Stat(zName)
+	return err
+}
 
 func (xos *XOS) xAccess() {}
 

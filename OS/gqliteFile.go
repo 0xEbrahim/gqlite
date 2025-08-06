@@ -51,3 +51,7 @@ func (gqlF *GqliteFile) XFileSize() (int64, error) {
 	sz := info.Size()
 	return sz, nil
 }
+
+// XLock TODO: implement locking and unlocking [For future]/*
+func (gqlF *GqliteFile) XLock(flag int64)   {}
+func (gqlF *GqliteFile) XUnlock(flag int64) {}
