@@ -13,6 +13,9 @@ const (
 	WRITE_ONLY      int = syscall.O_WRONLY
 	READ_WRITE_ONLY int = syscall.O_RDWR
 	CREATE_         int = syscall.O_CREAT
+	ACCESS_EXIST    int = 0
+	ACCESS_READABLE int = 1
+	ACCESS_WRITABLE int = 2
 )
 
 type gqliteFilename = string
@@ -33,7 +36,7 @@ func (xos *XOS) XOpen(zName gqliteFilename, flags int) (GqliteFile, error) {
 		return GqliteFile{}, fmt.Errorf("file does not exist: %w", err)
 	}
 	f, err := os.OpenFile(fullPath, flags, 0)
-	gqliteFile := GqliteFile{File: f}
+	gqliteFile := GqliteFile{File: f, Path: fullPath}
 	return gqliteFile, err
 }
 
@@ -63,12 +66,33 @@ func (xos *XOS) xDelete(zName gqliteFilename, dirSync bool) error {
 	return nil
 }
 
+func (xos *XOS) XAccess(zName gqliteFilename, flag int) bool {
+	if flag == ACCESS_EXIST {
+		if err := xos.XFileExists(zName); err != nil {
+			return false
+		}
+	} else if flag == ACCESS_READABLE {
+		f, err := os.Open(zName)
+		if err != nil {
+			return false
+		}
+		_ = f.Close()
+	} else if flag == ACCESS_WRITABLE {
+		f, err := os.OpenFile(zName, WRITE_ONLY, 0)
+		if err != nil {
+			return false
+		}
+		_ = f.Close()
+	} else {
+		return false
+	}
+	return true
+}
+
 func (xos *XOS) XFileExists(zName gqliteFilename) error {
 	_, err := os.Stat(zName)
 	return err
 }
-
-func (xos *XOS) xAccess() {}
 
 func (xos *XOS) XFullPathName(fileName string) (string, error) {
 	cwd, err := os.Getwd()
