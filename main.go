@@ -24,6 +24,9 @@ func main() {
 		switch statement.PrepareStatement(inputBuffer) {
 		case Parser.STATEMENT_PREPARE_SUCCESS:
 			break
+		case Parser.STATEMENT_PREPARE_ERROR:
+			fmt.Println("Error while preparing the query, please check the query again")
+			continue
 		case Parser.STATEMENT_UNRECOGNIZED:
 			fmt.Println("Unrecognized keyword at the start of: " + inputBuffer.Buffer)
 			continue

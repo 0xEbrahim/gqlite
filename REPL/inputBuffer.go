@@ -1,9 +1,11 @@
 package REPL
 
 import (
+	"bufio"
 	"cmp"
 	"fmt"
 	"log"
+	"os"
 	"unicode/utf8"
 )
 
@@ -24,8 +26,11 @@ func NewInputBuffer() *InputBuffer {
 
 // ReadInput IB -> Input Buffer
 func (IB *InputBuffer) ReadInput() {
-	n, err := fmt.Scanln(&IB.Buffer)
-	if cmp.Or(err != nil, n <= 0) {
+	reader := bufio.NewReader(os.Stdin)
+	str, err := reader.ReadString('\n')
+	IB.Buffer = str
+	fmt.Println(IB.Buffer)
+	if cmp.Or(err != nil) {
 		log.Fatal("Error reading input \n")
 		return
 	}
