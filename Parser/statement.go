@@ -21,13 +21,17 @@ type Statement struct {
 	row   Row
 }
 
+func strToLower(str string) string {
+	return strings.ToLower(strings.TrimSpace(str))
+}
+
 func (statement *Statement) PrepareStatement(IB *REPL.InputBuffer) StatementType {
-	if strings.Compare(strings.ToLower(IB.Buffer), "select") == 0 {
+	if strings.Compare(strToLower(IB.Buffer), "select") == 0 {
 		statement.SType = SELECT_STATEMENT
 		return STATEMENT_PREPARE_SUCCESS
-	} else if strings.Compare(strings.ToLower(IB.Buffer), "insert") == 0 {
+	} else if strings.Compare(strToLower(IB.Buffer), "insert") == 0 {
 		statement.SType = INSERT_STATEMENT
-		n, err := fmt.Sscan(IB.Buffer, "insert %d %s %s", &statement.row.id, &statement.row.username, &statement.row.email)
+		n, err := fmt.Sscanf(IB.Buffer, "insert %d %s %s", &statement.row.id, &statement.row.username, &statement.row.email)
 		if err != nil || n < 3 {
 			return STATEMENT_PREPARE_ERROR
 		}

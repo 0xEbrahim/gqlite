@@ -11,7 +11,7 @@ type MetaCommandResult int
 
 const (
 	COLUMN_USERNAME_SIZE uint = 32
-	COLUMN_EMEAIL_SIZE   uint = 255
+	COLUMN_EMAIL_SIZE    uint = 255
 )
 
 const (
@@ -32,7 +32,7 @@ var (
 type Row struct {
 	id       int
 	username [COLUMN_USERNAME_SIZE]byte
-	email    [COLUMN_EMEAIL_SIZE]byte
+	email    [COLUMN_EMAIL_SIZE]byte
 }
 
 func (r *Row) serialize(dest []byte) {
@@ -44,7 +44,7 @@ func (r *Row) serialize(dest []byte) {
 }
 
 func ExecMetaCommand(IB *REPL.InputBuffer) MetaCommandResult {
-	if strings.Compare(IB.Buffer, ".exit") == 0 {
+	if strings.Compare(strToLower(IB.Buffer), ".exit") == 0 {
 		os.Exit(0)
 		return META_SUCCESSFUL
 	} else {
