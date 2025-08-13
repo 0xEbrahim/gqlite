@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"encoding/binary"
 	"fmt"
 	"unsafe"
 )
@@ -27,17 +28,16 @@ type Row struct {
 }
 
 func (source *Row) Serialize(dest []byte) {
-	copy(dest[ID_OFFSET:ID_OFFSET+ID_SIZE],
-		(*[1 << 30]byte)(unsafe.Pointer(&source.Id))[:ID_SIZE:ID_SIZE])
-	copy(dest[USERNAME_OFFSET:USERNAME_OFFSET+USERNAME_SIZE], (*[1 << 30]byte)(unsafe.Pointer(&source.Username))[:USERNAME_SIZE:USERNAME_SIZE])
-	copy(dest[EMAIL_OFFSET:EMAIL_OFFSET+EMAIL_SIZE],
-		(*[1 << 30]byte)(unsafe.Pointer(&source.Email))[:EMAIL_SIZE:EMAIL_SIZE])
+	binary.LittleEndian.PutUint32(dest[ID_OFFSET:ID_OFFSET+ID_SIZE], uint32(source.Id))
+	copy(dest[USERNAME_OFFSET:USERNAME_OFFSET+USERNAME_SIZE], source.Username[:])
+	copy(dest[EMAIL_OFFSET:EMAIL_OFFSET+EMAIL_SIZE], source.Email[:])
 }
 
 func (dest *Row) Deserialize(source []byte) {
 	copy((*[1 << 30]byte)(unsafe.Pointer(&dest.Id))[:ID_SIZE:ID_SIZE], source[ID_OFFSET:ID_OFFSET+ID_SIZE])
-	copy((*[1 << 30]byte)(unsafe.Pointer(&dest.Username))[:USERNAME_SIZE:USERNAME_SIZE], source[USERNAME_OFFSET:USERNAME_OFFSET+USERNAME_SIZE])
-	copy((*[1 << 30]byte)(unsafe.Pointer(&dest.Email))[:EMAIL_SIZE:EMAIL_SIZE], source[EMAIL_OFFSET:EMAIL_OFFSET+EMAIL_SIZE])
+	dest.Id = int(binary.LittleEndian.Uint32(source[ID_OFFSET : ID_OFFSET+ID_SIZE]))
+	copy(dest.Username[:], source[USERNAME_OFFSET:USERNAME_OFFSET+USERNAME_SIZE])
+	copy(dest.Email[:], source[EMAIL_OFFSET:EMAIL_OFFSET+EMAIL_SIZE])
 }
 
 func (row *Row) PrintRow() {
