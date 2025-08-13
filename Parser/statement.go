@@ -44,11 +44,11 @@ func (statement *Statement) PrepareStatement(IB *REPL.InputBuffer) StatementType
 		if err != nil || n < 3 {
 			return STATEMENT_PREPARE_ERROR
 		}
-		if len(username) > storage.COLUMN_USERNAME_SIZE {
+		if uint(len(username)) > storage.COLUMN_USERNAME_SIZE {
 			fmt.Println("Error: username is too long.")
 			return STATEMENT_PREPARE_ERROR
 		}
-		if len(email) > storage.COLUMN_EMAIL_SIZE {
+		if uint(len(email)) > storage.COLUMN_EMAIL_SIZE {
 			fmt.Println("Error: email is too long.")
 			return STATEMENT_PREPARE_ERROR
 		}

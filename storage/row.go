@@ -34,7 +34,6 @@ func (source *Row) Serialize(dest []byte) {
 }
 
 func (dest *Row) Deserialize(source []byte) {
-	copy((*[1 << 30]byte)(unsafe.Pointer(&dest.Id))[:ID_SIZE:ID_SIZE], source[ID_OFFSET:ID_OFFSET+ID_SIZE])
 	dest.Id = int(binary.LittleEndian.Uint32(source[ID_OFFSET : ID_OFFSET+ID_SIZE]))
 	copy(dest.Username[:], source[USERNAME_OFFSET:USERNAME_OFFSET+USERNAME_SIZE])
 	copy(dest.Email[:], source[EMAIL_OFFSET:EMAIL_OFFSET+EMAIL_SIZE])
