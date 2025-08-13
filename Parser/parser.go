@@ -4,7 +4,6 @@ import (
 	"gqlite/REPL"
 	"os"
 	"strings"
-	"unsafe"
 )
 
 type MetaCommandResult int

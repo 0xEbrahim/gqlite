@@ -11,6 +11,18 @@ var (
 )
 
 type Table struct {
-	num_rows uint
-	pages    [MAX_PAGES_IN_TABLE][]byte
+	RowsNum uint
+	Pages   [MAX_PAGES_IN_TABLE][]byte
+}
+
+func (tbl *Table) RowSlot(rowNum uint) []byte {
+	pageNum := rowNum / ROWS_PER_PAGE
+	page := tbl.Pages[pageNum]
+	if page == nil {
+		page = make([]byte, PAGE_SIZE)
+		tbl.Pages[pageNum] = page
+	}
+	rowOffset := rowNum % ROWS_PER_PAGE
+	byteOffset := rowOffset * ROW_SIZE
+	return page[byteOffset : byteOffset+ROW_SIZE]
 }

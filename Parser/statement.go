@@ -17,6 +17,13 @@ const (
 	STATEMENT_PREPARE_ERROR
 )
 
+type StatementExecRes uint
+
+const (
+	EXECUTE_TABLE_FULL StatementExecRes = iota
+	EXECUTED_SUCCESSFULLY
+)
+
 type Statement struct {
 	SType StatementType
 	row   storage.Row
@@ -42,13 +49,25 @@ func (statement *Statement) PrepareStatement(IB *REPL.InputBuffer) StatementType
 	}
 }
 
-func (statement *Statement) Exec() {
-	switch statement.SType {
-	case SELECT_STATEMENT:
-		println("This is a select statement")
-	case INSERT_STATEMENT:
-		println("This is an insert statement")
-	default:
-		panic("unhandled default case")
+func (statement *Statement) ExecInsert(table *storage.Table) StatementExecRes {
+	if table.RowsNum >= storage.TABLE_MAX_ROWS {
+		return EXECUTE_TABLE_FULL
 	}
+	rowToInsert := &statement.row
+	rowToInsert.Serialize(table.RowSlot(table.RowsNum))
+	table.RowsNum += 1
+	return EXECUTED_SUCCESSFULLY
+}
+
+func (statement *Statement) ExecSelect(table *storage.Table) StatementExecRes {
+	var row storage.Row
+	for i := 0; uint(i) < table.RowsNum; i++ {
+		row.Deserialize(table.RowSlot(uint(i)))
+		row.PrintRow()
+	}
+	return EXECUTED_SUCCESSFULLY
+}
+
+func (statement *Statement) ExecuteStatement() {
+
 }

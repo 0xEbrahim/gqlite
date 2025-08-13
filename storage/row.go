@@ -1,6 +1,9 @@
 package storage
 
-import "unsafe"
+import (
+	"fmt"
+	"unsafe"
+)
 
 var (
 	ID_SIZE         uint = uint(SizeOfAttr(Row{}.Id))
@@ -35,6 +38,10 @@ func (dest *Row) Deserialize(source []byte) {
 	copy((*[1 << 30]byte)(unsafe.Pointer(&dest.Id))[:ID_SIZE:ID_SIZE], source[ID_OFFSET:ID_OFFSET+ID_SIZE])
 	copy((*[1 << 30]byte)(unsafe.Pointer(&dest.Username))[:USERNAME_SIZE:USERNAME_SIZE], source[USERNAME_OFFSET:USERNAME_OFFSET+USERNAME_SIZE])
 	copy((*[1 << 30]byte)(unsafe.Pointer(&dest.Email))[:EMAIL_SIZE:EMAIL_SIZE], source[EMAIL_OFFSET:EMAIL_OFFSET+EMAIL_SIZE])
+}
+
+func (row *Row) PrintRow() {
+	fmt.Printf("(%d, %s, %s)\n", row.Id, row.Username, row.Email)
 }
 
 func SizeOfAttr(x any) uintptr {

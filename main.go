@@ -33,7 +33,7 @@ func main() {
 		default:
 			panic("unhandled default case")
 		}
-		statement.Exec()
+		statement.ExecInsert()
 		fmt.Println("Executed.")
 	}
 
