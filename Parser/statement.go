@@ -3,6 +3,7 @@ package Parser
 import (
 	"fmt"
 	"gqlite/REPL"
+	"gqlite/storage"
 	"strings"
 )
 
@@ -16,37 +17,74 @@ const (
 	STATEMENT_PREPARE_ERROR
 )
 
+type StatementExecRes uint
+
+const (
+	EXECUTE_TABLE_FULL StatementExecRes = iota
+	EXECUTED_SUCCESSFULLY
+)
+
 type Statement struct {
 	SType StatementType
-	row   Row
+	Row   storage.Row
 }
 
-func strToLower(str string) string {
-	return strings.ToLower(strings.TrimSpace(str))
+func trimSpaces(str string) string {
+	return strings.TrimSpace(str)
 }
 
 func (statement *Statement) PrepareStatement(IB *REPL.InputBuffer) StatementType {
-	if strings.Compare(strToLower(IB.Buffer), "select") == 0 {
+	if strings.HasPrefix(trimSpaces(IB.Buffer), "select") {
 		statement.SType = SELECT_STATEMENT
 		return STATEMENT_PREPARE_SUCCESS
-	} else if strings.Compare(strToLower(IB.Buffer), "insert") == 0 {
+	} else if strings.HasPrefix(trimSpaces(IB.Buffer), "insert") {
 		statement.SType = INSERT_STATEMENT
-		n, err := fmt.Sscanf(IB.Buffer, "insert %d %s %s", &statement.row.id, &statement.row.username, &statement.row.email)
+		var username, email string
+		n, err := fmt.Sscanf(IB.Buffer, "insert %d %s %s", &statement.Row.Id, &username, &email)
 		if err != nil || n < 3 {
 			return STATEMENT_PREPARE_ERROR
 		}
+		if uint(len(username)) > storage.COLUMN_USERNAME_SIZE {
+			fmt.Println("Error: username is too long.")
+			return STATEMENT_PREPARE_ERROR
+		}
+		if uint(len(email)) > storage.COLUMN_EMAIL_SIZE {
+			fmt.Println("Error: email is too long.")
+			return STATEMENT_PREPARE_ERROR
+		}
+		copy(statement.Row.Username[:], username)
+		copy(statement.Row.Email[:], email)
 		return STATEMENT_PREPARE_SUCCESS
 	} else {
 		return STATEMENT_UNRECOGNIZED
 	}
 }
 
-func (statement *Statement) Exec() {
+func (statement *Statement) ExecInsert(table *storage.Table) StatementExecRes {
+	if table.RowsNum >= storage.TABLE_MAX_ROWS {
+		return EXECUTE_TABLE_FULL
+	}
+	rowToInsert := &statement.Row
+	rowToInsert.Serialize(table.RowSlot(table.RowsNum))
+	table.RowsNum += 1
+	return EXECUTED_SUCCESSFULLY
+}
+
+func (statement *Statement) ExecSelect(table *storage.Table) StatementExecRes {
+	var row storage.Row
+	for i := 0; uint(i) < table.RowsNum; i++ {
+		row.Deserialize(table.RowSlot(uint(i)))
+		row.PrintRow()
+	}
+	return EXECUTED_SUCCESSFULLY
+}
+
+func (statement *Statement) ExecuteStatement(table *storage.Table) StatementExecRes {
 	switch statement.SType {
 	case SELECT_STATEMENT:
-		println("This is a select statement")
+		return statement.ExecSelect(table)
 	case INSERT_STATEMENT:
-		println("This is an insert statement")
+		return statement.ExecInsert(table)
 	default:
 		panic("unhandled default case")
 	}
