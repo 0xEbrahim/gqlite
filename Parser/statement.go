@@ -31,7 +31,7 @@ func (statement *Statement) PrepareStatement(IB *REPL.InputBuffer) StatementType
 		return STATEMENT_PREPARE_SUCCESS
 	} else if strings.Compare(strToLower(IB.Buffer), "insert") == 0 {
 		statement.SType = INSERT_STATEMENT
-		n, err := fmt.Sscanf(IB.Buffer, "insert %d %s %s", &statement.row.id, &statement.row.username, &statement.row.email)
+		n, err := fmt.Sscanf(IB.Buffer, "insert %d %s %s", &statement.row.Id, &statement.row.Username, &statement.row.Email)
 		if err != nil || n < 3 {
 			return STATEMENT_PREPARE_ERROR
 		}
