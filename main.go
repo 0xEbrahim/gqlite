@@ -40,7 +40,7 @@ func main() {
 			println("Executed.")
 			continue
 		case Parser.EXECUTE_TABLE_FULL:
-			print("cannot insert on this table because it is full")
+			fmt.Println("cannot insert on this table because it is full")
 			continue
 		}
 
