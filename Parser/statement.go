@@ -3,6 +3,7 @@ package Parser
 import (
 	"fmt"
 	"gqlite/REPL"
+	"gqlite/storage"
 	"strings"
 )
 
@@ -18,7 +19,7 @@ const (
 
 type Statement struct {
 	SType StatementType
-	row   Row
+	row   storage.Row
 }
 
 func strToLower(str string) string {
