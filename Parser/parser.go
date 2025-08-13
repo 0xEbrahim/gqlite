@@ -14,7 +14,7 @@ const (
 )
 
 func ExecMetaCommand(IB *REPL.InputBuffer) MetaCommandResult {
-	if strings.Compare(strToLower(IB.Buffer), ".exit") == 0 {
+	if strings.Compare(trimSpaces(IB.Buffer), ".exit") == 0 {
 		os.Exit(0)
 		return META_SUCCESSFUL
 	} else {

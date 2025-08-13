@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"gqlite/Parser"
 	"gqlite/REPL"
+	"gqlite/storage"
 )
 
 func main() {
+	table := storage.NewTable()
 	inputBuffer := REPL.NewInputBuffer()
 	for {
 		REPL.PrintPrompt()
@@ -33,8 +35,15 @@ func main() {
 		default:
 			panic("unhandled default case")
 		}
-		statement.ExecInsert()
-		fmt.Println("Executed.")
+		switch statement.ExecuteStatement(table) {
+		case Parser.EXECUTED_SUCCESSFULLY:
+			println("Executed.")
+			continue
+		case Parser.EXECUTE_TABLE_FULL:
+			print("cannot insert on this table because it is full")
+			continue
+		}
+
 	}
 
 }

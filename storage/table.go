@@ -26,3 +26,9 @@ func (tbl *Table) RowSlot(rowNum uint) []byte {
 	byteOffset := rowOffset * ROW_SIZE
 	return page[byteOffset : byteOffset+ROW_SIZE]
 }
+
+func NewTable() *Table {
+	var pages [MAX_PAGES_IN_TABLE][]byte
+	table := &Table{RowsNum: 0, Pages: pages}
+	return table
+}

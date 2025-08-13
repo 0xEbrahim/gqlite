@@ -26,23 +26,26 @@ const (
 
 type Statement struct {
 	SType StatementType
-	row   storage.Row
+	Row   storage.Row
 }
 
-func strToLower(str string) string {
-	return strings.ToLower(strings.TrimSpace(str))
+func trimSpaces(str string) string {
+	return strings.TrimSpace(str)
 }
 
 func (statement *Statement) PrepareStatement(IB *REPL.InputBuffer) StatementType {
-	if strings.Compare(strToLower(IB.Buffer), "select") == 0 {
+	if strings.HasPrefix(trimSpaces(IB.Buffer), "select") {
 		statement.SType = SELECT_STATEMENT
 		return STATEMENT_PREPARE_SUCCESS
-	} else if strings.Compare(strToLower(IB.Buffer), "insert") == 0 {
+	} else if strings.HasPrefix(trimSpaces(IB.Buffer), "insert") {
 		statement.SType = INSERT_STATEMENT
-		n, err := fmt.Sscanf(IB.Buffer, "insert %d %s %s", &statement.row.Id, &statement.row.Username, &statement.row.Email)
+		var username, email string
+		n, err := fmt.Sscanf(IB.Buffer, "insert %d %s %s", &statement.Row.Id, &username, &email)
 		if err != nil || n < 3 {
 			return STATEMENT_PREPARE_ERROR
 		}
+		copy(statement.Row.Username[:], username)
+		copy(statement.Row.Email[:], email)
 		return STATEMENT_PREPARE_SUCCESS
 	} else {
 		return STATEMENT_UNRECOGNIZED
@@ -53,7 +56,7 @@ func (statement *Statement) ExecInsert(table *storage.Table) StatementExecRes {
 	if table.RowsNum >= storage.TABLE_MAX_ROWS {
 		return EXECUTE_TABLE_FULL
 	}
-	rowToInsert := &statement.row
+	rowToInsert := &statement.Row
 	rowToInsert.Serialize(table.RowSlot(table.RowsNum))
 	table.RowsNum += 1
 	return EXECUTED_SUCCESSFULLY
@@ -68,6 +71,13 @@ func (statement *Statement) ExecSelect(table *storage.Table) StatementExecRes {
 	return EXECUTED_SUCCESSFULLY
 }
 
-func (statement *Statement) ExecuteStatement() {
-
+func (statement *Statement) ExecuteStatement(table *storage.Table) StatementExecRes {
+	switch statement.SType {
+	case SELECT_STATEMENT:
+		return statement.ExecSelect(table)
+	case INSERT_STATEMENT:
+		return statement.ExecInsert(table)
+	default:
+		panic("unhandled default case")
+	}
 }
