@@ -16,6 +16,9 @@ type Table struct {
 }
 
 func (tbl *Table) RowSlot(rowNum uint) []byte {
+	if rowNum >= TABLE_MAX_ROWS {
+		return nil
+	}
 	pageNum := rowNum / ROWS_PER_PAGE
 	page := tbl.Pages[pageNum]
 	if page == nil {
