@@ -26,7 +26,7 @@ func (cursor *Cursor) Advance() {
 func (cursor *Cursor) CursorValue() []byte {
 	rowNum := cursor.RowNum
 	table := cursor.Table
-	if rowNum >= TABLE_MAX_ROWS {
+	if rowNum >= TABLE_MAX_ROWS || rowNum >= table.RowsNum {
 		return nil
 	}
 	pageNum := rowNum / ROWS_PER_PAGE
