@@ -28,7 +28,6 @@ func (IB *InputBuffer) ReadInput() {
 	reader := bufio.NewReader(os.Stdin)
 	str, err := reader.ReadString('\n')
 	IB.Buffer = str
-	fmt.Println(IB.Buffer)
 	if err != nil {
 		log.Fatal("Error reading input \n")
 		return

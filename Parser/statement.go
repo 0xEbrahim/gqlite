@@ -3,11 +3,20 @@ package Parser
 import (
 	"fmt"
 	"gqlite/REPL"
+	"gqlite/db"
 	"gqlite/storage"
+	"os"
 	"strings"
 )
 
 type StatementType int
+
+type MetaCommandResult int
+
+const (
+	META_SUCCESSFUL MetaCommandResult = iota
+	META_UNRECOGNIZED
+)
 
 const (
 	INSERT_STATEMENT StatementType = iota
@@ -31,6 +40,16 @@ type Statement struct {
 
 func trimSpaces(str string) string {
 	return strings.TrimSpace(str)
+}
+
+func ExecMetaCommand(IB *REPL.InputBuffer, table *storage.Table) MetaCommandResult {
+	if strings.Compare(trimSpaces(IB.Buffer), ".exit") == 0 {
+		db.CloseDB(table)
+		os.Exit(0)
+		return META_SUCCESSFUL
+	} else {
+		return META_UNRECOGNIZED
+	}
 }
 
 func (statement *Statement) PrepareStatement(IB *REPL.InputBuffer) StatementType {
