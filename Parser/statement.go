@@ -84,16 +84,19 @@ func (statement *Statement) ExecInsert(table *storage.Table) StatementExecRes {
 		return EXECUTE_TABLE_FULL
 	}
 	rowToInsert := &statement.Row
-	rowToInsert.Serialize(table.RowSlot(table.RowsNum))
+	cursor := storage.BottomCursor(table)
+	rowToInsert.Serialize(cursor.CursorValue())
 	table.RowsNum += 1
 	return EXECUTED_SUCCESSFULLY
 }
 
 func (statement *Statement) ExecSelect(table *storage.Table) StatementExecRes {
 	var row storage.Row
-	for i := 0; uint(i) < table.RowsNum; i++ {
-		row.Deserialize(table.RowSlot(uint(i)))
+	cursor := storage.TopCursor(table)
+	for !(cursor.EndOfTable) {
+		row.Deserialize(cursor.CursorValue())
 		row.PrintRow()
+		cursor.Advance()
 	}
 	return EXECUTED_SUCCESSFULLY
 }
