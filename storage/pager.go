@@ -13,11 +13,14 @@ type Pager struct {
 }
 
 func PagerOpen(fileName string) *Pager {
-	fd, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 644)
+	fd, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatal("Unable to open database file")
 	}
 	info, err := fd.Stat()
+	if err != nil {
+		log.Fatal("Unable to stat database file")
+	}
 	sz := info.Size()
 	var pages [MAX_PAGES_IN_TABLE][]byte
 	for i := 0; uint(i) < MAX_PAGES_IN_TABLE; i++ {
@@ -39,7 +42,7 @@ func (pager *Pager) getPage(pageNum uint) []byte {
 		}
 		if pageNum <= numberOfPages {
 			_, err := pager.File.ReadAt(page, int64(pageNum*PAGE_SIZE))
-			if err != io.EOF {
+			if err != nil && err != io.EOF {
 				log.Fatal("Error while reading the page")
 			}
 		}

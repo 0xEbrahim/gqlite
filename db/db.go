@@ -31,7 +31,7 @@ func CloseDB(table *storage.Table) {
 	}
 	err := pager.File.Close()
 	if err != nil {
-		log.Fatal("Error while close descriptor file")
+		log.Fatal("Error while closing file descriptor")
 	}
 	for i := 0; uint(i) < storage.MAX_PAGES_IN_TABLE; i++ {
 		pager.Pages[i] = nil
