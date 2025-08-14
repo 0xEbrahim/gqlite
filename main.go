@@ -4,17 +4,24 @@ import (
 	"fmt"
 	"gqlite/Parser"
 	"gqlite/REPL"
-	"gqlite/storage"
+	"gqlite/db"
+	"log"
+	"os"
 )
 
 func main() {
-	table := storage.NewTable()
+	args := os.Args
+	if len(args) < 2 {
+		log.Fatal("You need to provide the database file")
+	}
+	dbFile := args[1]
+	table := db.OpenDB(dbFile)
 	inputBuffer := REPL.NewInputBuffer()
 	for {
 		REPL.PrintPrompt()
 		inputBuffer.ReadInput()
 		if inputBuffer.Buffer[0] == '.' {
-			switch Parser.ExecMetaCommand(inputBuffer) {
+			switch Parser.ExecMetaCommand(inputBuffer, table) {
 			case Parser.META_SUCCESSFUL:
 				continue
 			case Parser.META_UNRECOGNIZED:

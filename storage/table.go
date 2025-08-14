@@ -2,7 +2,7 @@ package storage
 
 const (
 	PAGE_SIZE          uint = 4096
-	MAX_PAGES_IN_TABLE uint = 100
+	MAX_PAGES_IN_TABLE uint = 1000
 )
 
 var (
@@ -12,7 +12,7 @@ var (
 
 type Table struct {
 	RowsNum uint
-	Pages   [MAX_PAGES_IN_TABLE][]byte
+	Pager   *Pager
 }
 
 func (tbl *Table) RowSlot(rowNum uint) []byte {
@@ -20,18 +20,8 @@ func (tbl *Table) RowSlot(rowNum uint) []byte {
 		return nil
 	}
 	pageNum := rowNum / ROWS_PER_PAGE
-	page := tbl.Pages[pageNum]
-	if page == nil {
-		page = make([]byte, PAGE_SIZE)
-		tbl.Pages[pageNum] = page
-	}
+	page := tbl.Pager.getPage(pageNum)
 	rowOffset := rowNum % ROWS_PER_PAGE
 	byteOffset := rowOffset * ROW_SIZE
 	return page[byteOffset : byteOffset+ROW_SIZE]
-}
-
-func NewTable() *Table {
-	var pages [MAX_PAGES_IN_TABLE][]byte
-	table := &Table{RowsNum: 0, Pages: pages}
-	return table
 }
